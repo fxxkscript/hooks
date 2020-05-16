@@ -1,0 +1,23 @@
+{
+  "name": "hooks",
+  "version": "0.0.1",
+  "description": "React Hooks For Internal Usage",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hooks",
+    "react"
+  ],
+  "author": "FxxkScript",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "react": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.151",
+    "@types/react": "^16.9.35"
+  }
+}
