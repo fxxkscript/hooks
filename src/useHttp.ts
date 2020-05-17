@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useCallback } from "react";
+import { useEffect, useReducer, useCallback } from 'react';
 
 interface State {
   data: Action['data'];
@@ -16,7 +16,7 @@ interface Action {
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
-    case "FETCH_INIT":
+    case 'FETCH_INIT':
       return {
         ...state,
         data: action.data,
@@ -25,14 +25,14 @@ const reducer = (state: State, action: Action) => {
         isError: false,
         payload: null,
       };
-    case "FETCH_START":
+    case 'FETCH_START':
       return {
         ...state,
         isLoading: true,
         isError: false,
         isLoaded: false,
       };
-    case "FETCH_SUCCESS":
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
@@ -40,7 +40,7 @@ const reducer = (state: State, action: Action) => {
         isLoaded: true,
         payload: action.payload,
       };
-    case "FETCH_FAILURE":
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
@@ -53,7 +53,7 @@ const reducer = (state: State, action: Action) => {
   }
 };
 
-export const useHttp = (fetch: Function) => {
+export function useHttp(fetch: Function): [any, Function] {
   const [state, dispatch] = useReducer(reducer, {
     isLoading: false,
     isError: false,
@@ -62,9 +62,9 @@ export const useHttp = (fetch: Function) => {
     payload: null,
   });
 
-  const doFetch = useCallback((data: any) => {
+  const doFetch: (data: any) => void = useCallback((data: any) => {
     dispatch({
-      type: "FETCH_INIT",
+      type: 'FETCH_INIT',
       data: data,
     });
   }, []);
@@ -75,15 +75,15 @@ export const useHttp = (fetch: Function) => {
     }
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: "FETCH_START" });
+      dispatch({ type: 'FETCH_START' });
       try {
         const result = await fetch(state.data);
         if (!didCancel) {
-          dispatch({ type: "FETCH_SUCCESS", payload: result });
+          dispatch({ type: 'FETCH_SUCCESS', payload: result });
         }
       } catch (error) {
         if (!didCancel) {
-          dispatch({ type: "FETCH_FAILURE" });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
     };
@@ -94,4 +94,4 @@ export const useHttp = (fetch: Function) => {
   }, [fetch, state.data]);
 
   return [state, doFetch];
-};
+}
