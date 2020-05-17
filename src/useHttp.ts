@@ -9,14 +9,25 @@ interface State {
 }
 
 interface Action {
+  /** type */
   type: string;
+  /** request data */
   data?: any;
+  /** response data */
   payload?: any;
+}
+
+enum FETCH {
+  INIT = 'FETCH_INIT',
+  START = 'FETCH_START',
+  SUCCESS = 'FETCH_SUCCESS',
+  FAILURE = 'FETCH_FAILURE',
+  CANCEL = 'FETCH_CANCEL'
 }
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
-    case 'FETCH_INIT':
+    case FETCH.INIT:
       return {
         ...state,
         data: action.data,
@@ -25,14 +36,14 @@ const reducer = (state: State, action: Action) => {
         isError: false,
         payload: null,
       };
-    case 'FETCH_START':
+    case FETCH.START:
       return {
         ...state,
         isLoading: true,
         isError: false,
         isLoaded: false,
       };
-    case 'FETCH_SUCCESS':
+    case FETCH.SUCCESS:
       return {
         ...state,
         isLoading: false,
@@ -40,7 +51,7 @@ const reducer = (state: State, action: Action) => {
         isLoaded: true,
         payload: action.payload,
       };
-    case 'FETCH_FAILURE':
+    case FETCH.FAILURE:
       return {
         ...state,
         isLoading: false,
@@ -48,12 +59,20 @@ const reducer = (state: State, action: Action) => {
         isLoaded: true,
         payload: null,
       };
+    case FETCH.CANCEL:
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        isLoaded: false,
+        payload: null,
+      };
     default:
-      throw new Error();
+      throw new Error('[useHttp] type is not right');
   }
 };
 
-export function useHttp(fetch: Function): [any, Function] {
+export function useHttp(fetch: (data: any) => Promise<any>): [any, Function] {
   const [state, dispatch] = useReducer(reducer, {
     isLoading: false,
     isError: false,
@@ -64,26 +83,30 @@ export function useHttp(fetch: Function): [any, Function] {
 
   const doFetch: (data: any) => void = useCallback((data: any) => {
     dispatch({
-      type: 'FETCH_INIT',
-      data: data,
+      type: FETCH.INIT,
+      data,
     });
   }, []);
 
   useEffect(() => {
-    if (!state.data) {
+    if (state.data === null) {
       return;
     }
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: 'FETCH_START' });
+      dispatch({ type: FETCH.START });
       try {
-        const result = await fetch(state.data);
+        const payload = await fetch(state.data);
         if (!didCancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: result });
+          dispatch({ type: FETCH.SUCCESS, payload });
+        } else {
+          dispatch({ type: FETCH.CANCEL });
         }
       } catch (error) {
         if (!didCancel) {
-          dispatch({ type: 'FETCH_FAILURE' });
+          dispatch({ type: FETCH.FAILURE });
+        } else {
+          dispatch({ type: FETCH.CANCEL });
         }
       }
     };
